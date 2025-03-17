@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { ThemeProvider } from '../../context/ThemeContext';
 import About from '../About';
 
@@ -32,15 +32,27 @@ describe('About Page', () => {
   test('renders skills section', () => {
     renderWithProviders(<About />);
     
-    expect(screen.getByRole('heading', { name: /My Skills/i })).toBeInTheDocument();
+    // Get the skills section by its heading
+    const skillsHeading = screen.getByRole('heading', { name: /My Skills/i });
+    expect(skillsHeading).toBeInTheDocument();
     
-    // Instead of looking for listitem role, look for skill names directly
-    expect(screen.getByText(/JavaScript/i)).toBeInTheDocument();
-    expect(screen.getByText(/React/i)).toBeInTheDocument();
-    expect(screen.getByText(/HTML\/CSS/i)).toBeInTheDocument();
+    // Get the parent container of the skills section
+    const skillsSection = skillsHeading.closest('div').parentElement;
+    
+    // Look for skills within this section
+    const skillTexts = within(skillsSection).getAllByText(/JavaScript|React|HTML\/CSS/i);
+    
+    // Check if we have at least one of each skill
+    const hasJavaScript = skillTexts.some(text => /JavaScript/i.test(text.textContent));
+    const hasReact = skillTexts.some(text => /React/i.test(text.textContent));
+    const hasHTML = skillTexts.some(text => /HTML\/CSS/i.test(text.textContent));
+    
+    expect(hasJavaScript).toBeTruthy();
+    expect(hasReact).toBeTruthy();
+    expect(hasHTML).toBeTruthy();
     
     // Check for progress bars
-    const progressBars = document.querySelectorAll('.bg-tertiary.h-2.rounded-full');
+    const progressBars = skillsSection.querySelectorAll('.bg-tertiary.h-2.rounded-full');
     expect(progressBars.length).toBeGreaterThanOrEqual(3);
   });
 
