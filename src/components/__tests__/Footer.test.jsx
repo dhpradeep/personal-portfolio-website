@@ -30,4 +30,26 @@ describe('Footer Component', () => {
     expect(githubLink).toHaveAttribute('target', '_blank');
     expect(githubLink).toHaveAttribute('rel', 'noopener noreferrer');
   });
+
+  test('renders all social icons', () => {
+    renderWithProviders(<Footer />);
+    
+    // Check for specific social icons by their parent elements
+    const socialIcons = document.querySelectorAll('.text-gray-600.dark\\:text-secondary');
+    expect(socialIcons.length).toBeGreaterThanOrEqual(4);
+  });
+
+  test('renders responsive layout', () => {
+    renderWithProviders(<Footer />);
+    
+    // Check for flex container
+    const flexContainer = document.querySelector('.flex.flex-col.md\\:flex-row');
+    expect(flexContainer).toBeInTheDocument();
+  });
+
+  test('renders all rights reserved text', () => {
+    renderWithProviders(<Footer />);
+    
+    expect(screen.getByText(/All rights reserved/i)).toBeInTheDocument();
+  });
 });

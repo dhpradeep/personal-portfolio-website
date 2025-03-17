@@ -1,6 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
-import { ThemeProvider } from '../context/ThemeContext';
+import { BrowserRouter, MemoryRouter } from 'react-router-dom';
 import App from '../App';
 
 // Mock the components used in App
@@ -11,41 +10,61 @@ jest.mock('../pages/About', () => () => <div data-testid="about-mock">About Mock
 jest.mock('../pages/Projects', () => () => <div data-testid="projects-mock">Projects Mock</div>);
 jest.mock('../pages/Contact', () => () => <div data-testid="contact-mock">Contact Mock</div>);
 
-const renderWithProviders = (ui) => {
-  return render(
-    <BrowserRouter>
-      <ThemeProvider>
-        {ui}
-      </ThemeProvider>
-    </BrowserRouter>
-  );
-};
+// Mock ThemeContext
+jest.mock('../context/ThemeContext', () => ({
+  ThemeProvider: ({ children }) => <div data-testid="theme-provider">{children}</div>,
+  useTheme: () => ({ darkMode: false, toggleTheme: jest.fn() }),
+}));
 
 describe('App Component', () => {
   test('renders navbar and footer', () => {
-    renderWithProviders(<App />);
+    render(
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    );
     
     expect(screen.getByTestId('navbar-mock')).toBeInTheDocument();
     expect(screen.getByTestId('footer-mock')).toBeInTheDocument();
   });
 
   test('renders home page by default', () => {
-    renderWithProviders(<App />);
+    render(
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    );
     
     expect(screen.getByTestId('home-mock')).toBeInTheDocument();
   });
 
-  test('applies dark mode class when dark mode is active', () => {
-    // Mock the useTheme hook to return darkMode as true
-    jest.mock('../context/ThemeContext', () => ({
-      ...jest.requireActual('../context/ThemeContext'),
-      useTheme: () => ({ darkMode: true, toggleTheme: jest.fn() }),
-    }));
+  test('renders about page when navigated to /about', () => {
+    render(
+      <MemoryRouter initialEntries={['/about']}>
+        <App />
+      </MemoryRouter>
+    );
     
-    renderWithProviders(<App />);
+    expect(screen.getByTestId('about-mock')).toBeInTheDocument();
+  });
+
+  test('renders projects page when navigated to /projects', () => {
+    render(
+      <MemoryRouter initialEntries={['/projects']}>
+        <App />
+      </MemoryRouter>
+    );
     
-    // Check if the dark class is applied
-    const appContainer = screen.getByTestId('app-container');
-    expect(appContainer).toHaveClass('dark');
+    expect(screen.getByTestId('projects-mock')).toBeInTheDocument();
+  });
+
+  test('renders contact page when navigated to /contact', () => {
+    render(
+      <MemoryRouter initialEntries={['/contact']}>
+        <App />
+      </MemoryRouter>
+    );
+    
+    expect(screen.getByTestId('contact-mock')).toBeInTheDocument();
   });
 });

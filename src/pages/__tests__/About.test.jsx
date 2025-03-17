@@ -45,4 +45,31 @@ describe('About Page', () => {
     expect(screen.getByText(/React/i)).toBeInTheDocument();
     expect(screen.getByText(/HTML\/CSS/i)).toBeInTheDocument();
   });
+
+  test('renders skill progress bars', () => {
+    renderWithProviders(<About />);
+    
+    // Get all progress bars
+    const progressBars = document.querySelectorAll('.bg-tertiary.h-2.rounded-full');
+    expect(progressBars.length).toBeGreaterThanOrEqual(6);
+    
+    // Check if each progress bar has a width style
+    progressBars.forEach(bar => {
+      expect(bar).toHaveStyle(/width: \d+%/);
+    });
+  });
+
+  test('renders multiple paragraphs in bio', () => {
+    renderWithProviders(<About />);
+    
+    const paragraphs = screen.getAllByText(/./i, { selector: 'p.text-gray-600' });
+    expect(paragraphs.length).toBeGreaterThanOrEqual(3);
+  });
+
+  test('renders section divider', () => {
+    renderWithProviders(<About />);
+    
+    const divider = document.querySelector('.w-16.h-1.bg-tertiary');
+    expect(divider).toBeInTheDocument();
+  });
 });

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { ThemeProvider } from '../../context/ThemeContext';
 import Projects from '../Projects';
 
@@ -69,5 +69,18 @@ describe('Projects Page', () => {
     expect(screen.getByText(/A fully responsive e-commerce platform/i)).toBeInTheDocument();
     expect(screen.getByText(/A drag-and-drop task management application/i)).toBeInTheDocument();
     expect(screen.getByText(/A weather application that displays forecast data/i)).toBeInTheDocument();
+  });
+
+  test('project images have correct attributes', () => {
+    renderWithProviders(<Projects />);
+    
+    const images = screen.getAllByRole('img');
+    expect(images.length).toBe(3);
+    
+    images.forEach(img => {
+      expect(img).toHaveAttribute('src');
+      expect(img).toHaveAttribute('alt');
+      expect(img).toHaveClass('w-full');
+    });
   });
 });

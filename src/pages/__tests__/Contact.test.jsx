@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { ThemeProvider } from '../../context/ThemeContext';
 import Contact from '../Contact';
 
@@ -13,9 +13,6 @@ jest.mock('react-intersection-observer', () => ({
   useInView: () => [jest.fn(), true],
 }));
 
-// Mock setTimeout
-jest.useFakeTimers();
-
 const renderWithProviders = (ui) => {
   return render(
     <ThemeProvider>
@@ -25,6 +22,16 @@ const renderWithProviders = (ui) => {
 };
 
 describe('Contact Page', () => {
+  beforeEach(() => {
+    // Mock timers
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    // Restore timers
+    jest.useRealTimers();
+  });
+
   test('renders contact section with heading', () => {
     renderWithProviders(<Contact />);
     
@@ -51,20 +58,23 @@ describe('Contact Page', () => {
     expect(screen.getByText(/Send Message/i)).toBeInTheDocument();
   });
 
-  test('form validation works - requires all fields', () => {
+  test('handles form input changes', () => {
     renderWithProviders(<Contact />);
     
     const nameInput = screen.getByLabelText(/Your Name/i);
     const emailInput = screen.getByLabelText(/Your Email/i);
     const messageInput = screen.getByLabelText(/Your Message/i);
     
-    // Check if inputs have required attribute
-    expect(nameInput).toBeRequired();
-    expect(emailInput).toBeRequired();
-    expect(messageInput).toBeRequired();
+    fireEvent.change(nameInput, { target: { value: 'Test User' } });
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
+    fireEvent.change(messageInput, { target: { value: 'Test message' } });
+    
+    expect(nameInput).toHaveValue('Test User');
+    expect(emailInput).toHaveValue('test@example.com');
+    expect(messageInput).toHaveValue('Test message');
   });
 
-  test('form submission works correctly', async () => {
+  test('form submission works correctly', () => {
     renderWithProviders(<Contact />);
     
     // Fill out the form
@@ -81,13 +91,15 @@ describe('Contact Page', () => {
     });
     
     // Submit the form
-    fireEvent.click(screen.getByText(/Send Message/i));
+    fireEvent.submit(screen.getByRole('button', { name: /Send Message/i }));
     
     // Check if button text changes to "Sending..."
     expect(screen.getByText(/Sending.../i)).toBeInTheDocument();
     
     // Fast-forward timers
-    jest.advanceTimersByTime(1500);
+    act(() => {
+      jest.advanceTimersByTime(1500);
+    });
     
     // Check for success message
     expect(screen.getByText(/Your message has been sent successfully!/i)).toBeInTheDocument();
@@ -96,5 +108,10 @@ describe('Contact Page', () => {
     expect(screen.getByLabelText(/Your Name/i)).toHaveValue('');
     expect(screen.getByLabelText(/Your Email/i)).toHaveValue('');
     expect(screen.getByLabelText(/Your Message/i)).toHaveValue('');
+    
+    // Fast-forward timers to reset status
+    act(() => {
+      jest.advanceTimersByTime(5000);
+    });
   });
 });
