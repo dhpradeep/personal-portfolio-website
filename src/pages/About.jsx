@@ -51,13 +51,12 @@ const About = () => {
                     <div className="flex justify-between mb-1">
                       <span className="text-gray-700 dark:text-secondary">{skill}</span>
                     </div>
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                      <div 
-                        className="bg-tertiary h-2 rounded-full" 
-                        style={{ width: `${Math.floor(Math.random() * 30) + 70}%` }}
-                      ></div>
+                    
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full">
+                      <div className="bg-tertiary h-2 rounded-full" style={{ width: '90%' }}></div>
                     </div>
-                  </div>
+                    
+                    </div>
                 ))}
               </div>
             </div>

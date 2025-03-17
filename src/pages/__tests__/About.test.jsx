@@ -1,14 +1,8 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { ThemeProvider } from '../../context/ThemeContext';
 import About from '../About';
 
-// Mock framer-motion and react-intersection-observer
-jest.mock('framer-motion', () => ({
-  motion: {
-    div: ({ children, ...props }) => <div {...props}>{children}</div>,
-  },
-}));
-
+// Mock react-intersection-observer
 jest.mock('react-intersection-observer', () => ({
   useInView: () => [jest.fn(), true],
 }));
@@ -25,25 +19,46 @@ describe('About Page', () => {
   test('renders about section with heading', () => {
     renderWithProviders(<About />);
     
-    expect(screen.getByText(/About Me/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /About Me/i, level: 2 })).toBeInTheDocument();
   });
 
   test('renders bio information', () => {
     renderWithProviders(<About />);
     
-    expect(screen.getByText(/Who I Am/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Who I Am/i })).toBeInTheDocument();
     expect(screen.getByText(/passionate frontend developer/i)).toBeInTheDocument();
   });
 
   test('renders skills section', () => {
     renderWithProviders(<About />);
     
-    expect(screen.getByText(/My Skills/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /My Skills/i })).toBeInTheDocument();
     
-    // Check for specific skills
-    expect(screen.getByText(/JavaScript/i)).toBeInTheDocument();
-    expect(screen.getByText(/React/i)).toBeInTheDocument();
-    expect(screen.getByText(/HTML\/CSS/i)).toBeInTheDocument();
+    // Get the skills section
+    const skillsSection = screen.getByRole('heading', { name: /My Skills/i }).closest('div').parentElement;
+    
+    // Check for specific skills within the skills section
+    const skillItems = within(skillsSection).getAllByRole('listitem');
+    
+    // Check if at least one skill item contains JavaScript
+    const hasJavaScript = skillItems.some(item => 
+      item.textContent.includes('JavaScript') || 
+      within(item).queryByText(/JavaScript/i)
+    );
+    expect(hasJavaScript).toBeTruthy();
+    
+    // Check for other skills
+    const hasReact = skillItems.some(item => 
+      item.textContent.includes('React') || 
+      within(item).queryByText(/React/i)
+    );
+    expect(hasReact).toBeTruthy();
+    
+    const hasHTML = skillItems.some(item => 
+      item.textContent.includes('HTML') || 
+      within(item).queryByText(/HTML/i)
+    );
+    expect(hasHTML).toBeTruthy();
   });
 
   test('renders skill progress bars', () => {
@@ -53,9 +68,14 @@ describe('About Page', () => {
     const progressBars = document.querySelectorAll('.bg-tertiary.h-2.rounded-full');
     expect(progressBars.length).toBeGreaterThanOrEqual(6);
     
-    // Check if each progress bar has a width style
+    // Check if each progress bar has a width attribute
     progressBars.forEach(bar => {
-      expect(bar).toHaveStyle(/width: \d+%/);
+      const style = window.getComputedStyle(bar);
+      expect(style.width).not.toBe('');
+      
+      // Alternative check that doesn't rely on computed styles
+      const widthAttr = bar.getAttribute('style');
+      expect(widthAttr).toMatch(/width:/);
     });
   });
 

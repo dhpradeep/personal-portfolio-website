@@ -2,13 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { ThemeProvider } from '../../context/ThemeContext';
 import Projects from '../Projects';
 
-// Mock framer-motion and react-intersection-observer
-jest.mock('framer-motion', () => ({
-  motion: {
-    div: ({ children, ...props }) => <div {...props}>{children}</div>,
-  },
-}));
-
+// Mock react-intersection-observer
 jest.mock('react-intersection-observer', () => ({
   useInView: () => [jest.fn(), true],
 }));
@@ -25,16 +19,20 @@ describe('Projects Page', () => {
   test('renders projects section with heading', () => {
     renderWithProviders(<Projects />);
     
-    expect(screen.getByRole('heading', { name: /My Projects/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /My Projects/i, level: 2 })).toBeInTheDocument();
   });
 
   test('renders project cards', () => {
     renderWithProviders(<Projects />);
     
-    // Check for project titles using heading role
-    expect(screen.getByRole('heading', { name: /E-Commerce Website/i })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /Task Management App/i })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /Weather Dashboard/i })).toBeInTheDocument();
+    // Check for project titles using heading role with specific level
+    const projectHeadings = screen.getAllByRole('heading', { level: 3 });
+    
+    // Check if we have the expected project titles
+    const projectTitles = projectHeadings.map(heading => heading.textContent);
+    expect(projectTitles).toContain('E-Commerce Website');
+    expect(projectTitles).toContain('Task Management App');
+    expect(projectTitles).toContain('Weather Dashboard');
   });
 
   test('renders project tags', () => {
@@ -44,9 +42,11 @@ describe('Projects Page', () => {
     const tags = screen.getAllByText(/React|Node\.js|MongoDB|Firebase|Express/i);
     
     // Check if we have at least one of each
-    expect(tags.some(tag => /React/i.test(tag.textContent))).toBeTruthy();
-    expect(tags.some(tag => /Node\.js/i.test(tag.textContent))).toBeTruthy();
-    expect(tags.some(tag => /MongoDB/i.test(tag.textContent))).toBeTruthy();
+    const tagTexts = tags.map(tag => tag.textContent);
+    expect(tagTexts.some(text => /React/i.test(text))).toBeTruthy();
+    expect(tagTexts.some(text => /Node\.js/i.test(text))).toBeTruthy();
+    expect(tagTexts.some(text => /MongoDB/i.test(text))).toBeTruthy();
+    expect(tagTexts.some(text => /Firebase/i.test(text))).toBeTruthy();
   });
 
   test('renders project links', () => {
@@ -71,9 +71,10 @@ describe('Projects Page', () => {
     // Get all paragraphs and check if specific descriptions exist
     const descriptions = screen.getAllByText(/platform|application|dashboard/i);
     
-    expect(descriptions.some(desc => /e-commerce platform/i.test(desc.textContent))).toBeTruthy();
-    expect(descriptions.some(desc => /task management application/i.test(desc.textContent))).toBeTruthy();
-    expect(descriptions.some(desc => /weather.*dashboard/i.test(desc.textContent))).toBeTruthy();
+    const descTexts = descriptions.map(desc => desc.textContent);
+    expect(descTexts.some(text => /e-commerce platform/i.test(text))).toBeTruthy();
+    expect(descTexts.some(text => /task management application/i.test(text))).toBeTruthy();
+    expect(descTexts.some(text => /weather.*dashboard/i.test(text))).toBeTruthy();
   });
 
   test('project images have correct attributes', () => {

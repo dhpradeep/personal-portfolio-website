@@ -27,4 +27,6 @@ export default {
       statements: 80,
     },
   },
+  // Add this to improve test coverage reporting
+  coverageReporters: ['text', 'lcov', 'clover', 'json'],
 };

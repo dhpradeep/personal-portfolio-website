@@ -2,15 +2,17 @@ import { render, screen, fireEvent, act, within } from '@testing-library/react';
 import { ThemeProvider } from '../../context/ThemeContext';
 import Contact from '../Contact';
 
-// Mock framer-motion and react-intersection-observer
-jest.mock('framer-motion', () => ({
-  motion: {
-    div: ({ children, ...props }) => <div {...props}>{children}</div>,
-  },
-}));
-
+// Mock react-intersection-observer
 jest.mock('react-intersection-observer', () => ({
   useInView: () => [jest.fn(), true],
+}));
+
+// Mock react-icons
+jest.mock('react-icons/fi', () => ({
+  FiMail: () => <span data-testid="mail-icon">Mail Icon</span>,
+  FiPhone: () => <span data-testid="phone-icon">Phone Icon</span>,
+  FiMapPin: () => <span data-testid="map-icon">Map Icon</span>,
+  FiSend: () => <span data-testid="send-icon">Send Icon</span>,
 }));
 
 const renderWithProviders = (ui) => {
@@ -35,7 +37,7 @@ describe('Contact Page', () => {
   test('renders contact section with heading', () => {
     renderWithProviders(<Contact />);
     
-    expect(screen.getByRole('heading', { name: /Get In Touch/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Get In Touch/i, level: 2 })).toBeInTheDocument();
   });
 
   test('renders contact information', () => {
@@ -44,12 +46,24 @@ describe('Contact Page', () => {
     // Use more specific selectors to find contact info
     const contactInfoSection = screen.getByTestId('contact-info');
     
-    // Check within this section
-    expect(within(contactInfoSection).getByText(/Email/i)).toBeInTheDocument();
+    // Check for email section using the icon
+    const mailIcon = within(contactInfoSection).getByTestId('mail-icon');
+    const emailHeading = mailIcon.closest('div').nextSibling.querySelector('h4');
+    expect(emailHeading).toHaveTextContent(/Email/i);
+    
+    // Check for phone section
+    const phoneIcon = within(contactInfoSection).getByTestId('phone-icon');
+    const phoneHeading = phoneIcon.closest('div').nextSibling.querySelector('h4');
+    expect(phoneHeading).toHaveTextContent(/Phone/i);
+    
+    // Check for location section
+    const mapIcon = within(contactInfoSection).getByTestId('map-icon');
+    const locationHeading = mapIcon.closest('div').nextSibling.querySelector('h4');
+    expect(locationHeading).toHaveTextContent(/Location/i);
+    
+    // Check for specific contact details
     expect(within(contactInfoSection).getByText(/your\.email@example\.com/i)).toBeInTheDocument();
-    expect(within(contactInfoSection).getByText(/Phone/i)).toBeInTheDocument();
     expect(within(contactInfoSection).getByText(/\+1 \(123\) 456-7890/i)).toBeInTheDocument();
-    expect(within(contactInfoSection).getByText(/Location/i)).toBeInTheDocument();
     expect(within(contactInfoSection).getByText(/San Francisco, CA/i)).toBeInTheDocument();
   });
 
