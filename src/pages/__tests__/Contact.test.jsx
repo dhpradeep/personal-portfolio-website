@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, act, within } from '@testing-library/react';
 import { ThemeProvider } from '../../context/ThemeContext';
 import Contact from '../Contact';
 
@@ -35,18 +35,22 @@ describe('Contact Page', () => {
   test('renders contact section with heading', () => {
     renderWithProviders(<Contact />);
     
-    expect(screen.getByText(/Get In Touch/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Get In Touch/i })).toBeInTheDocument();
   });
 
   test('renders contact information', () => {
     renderWithProviders(<Contact />);
     
-    expect(screen.getByText(/Email/i)).toBeInTheDocument();
-    expect(screen.getByText(/your\.email@example\.com/i)).toBeInTheDocument();
-    expect(screen.getByText(/Phone/i)).toBeInTheDocument();
-    expect(screen.getByText(/\+1 \(123\) 456-7890/i)).toBeInTheDocument();
-    expect(screen.getByText(/Location/i)).toBeInTheDocument();
-    expect(screen.getByText(/San Francisco, CA/i)).toBeInTheDocument();
+    // Use more specific selectors to find contact info
+    const contactInfoSection = screen.getByTestId('contact-info');
+    
+    // Check within this section
+    expect(within(contactInfoSection).getByText(/Email/i)).toBeInTheDocument();
+    expect(within(contactInfoSection).getByText(/your\.email@example\.com/i)).toBeInTheDocument();
+    expect(within(contactInfoSection).getByText(/Phone/i)).toBeInTheDocument();
+    expect(within(contactInfoSection).getByText(/\+1 \(123\) 456-7890/i)).toBeInTheDocument();
+    expect(within(contactInfoSection).getByText(/Location/i)).toBeInTheDocument();
+    expect(within(contactInfoSection).getByText(/San Francisco, CA/i)).toBeInTheDocument();
   });
 
   test('renders contact form with all fields', () => {
@@ -55,7 +59,7 @@ describe('Contact Page', () => {
     expect(screen.getByLabelText(/Your Name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Your Email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Your Message/i)).toBeInTheDocument();
-    expect(screen.getByText(/Send Message/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Send Message/i })).toBeInTheDocument();
   });
 
   test('handles form input changes', () => {

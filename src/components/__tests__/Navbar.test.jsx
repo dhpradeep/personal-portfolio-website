@@ -41,11 +41,12 @@ describe('Navbar Component', () => {
     // Check if logo/brand name is rendered
     expect(screen.getByText(/Your Name/i)).toBeInTheDocument();
     
-    // Check if navigation links are rendered
-    expect(screen.getByText(/Home/i)).toBeInTheDocument();
-    expect(screen.getByText(/About/i)).toBeInTheDocument();
-    expect(screen.getByText(/Projects/i)).toBeInTheDocument();
-    expect(screen.getByText(/Contact/i)).toBeInTheDocument();
+    // Check if navigation links are rendered - use getAllByRole instead of getByText
+    const navLinks = screen.getAllByRole('link');
+    expect(navLinks.some(link => /Home/i.test(link.textContent))).toBeTruthy();
+    expect(navLinks.some(link => /About/i.test(link.textContent))).toBeTruthy();
+    expect(navLinks.some(link => /Projects/i.test(link.textContent))).toBeTruthy();
+    expect(navLinks.some(link => /Contact/i.test(link.textContent))).toBeTruthy();
   });
 
   test('toggles mobile menu when menu button is clicked', () => {
@@ -81,12 +82,13 @@ describe('Navbar Component', () => {
   test('changes active link when clicked', () => {
     renderWithProviders(<Navbar />);
     
-    // Click on About link
-    const aboutLink = screen.getByText('About');
+    // Click on About link - use getAllByRole to get all links and find the About one
+    const navLinks = screen.getAllByRole('link');
+    const aboutLink = navLinks.find(link => /About/i.test(link.textContent));
     fireEvent.click(aboutLink);
     
     // Click on Projects link
-    const projectsLink = screen.getByText('Projects');
+    const projectsLink = navLinks.find(link => /Projects/i.test(link.textContent));
     fireEvent.click(projectsLink);
   });
 
