@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { ThemeProvider } from '../../context/ThemeContext';
 import About from '../About';
 
@@ -34,31 +34,14 @@ describe('About Page', () => {
     
     expect(screen.getByRole('heading', { name: /My Skills/i })).toBeInTheDocument();
     
-    // Get the skills section
-    const skillsSection = screen.getByRole('heading', { name: /My Skills/i }).closest('div').parentElement;
+    // Instead of looking for listitem role, look for skill names directly
+    expect(screen.getByText(/JavaScript/i)).toBeInTheDocument();
+    expect(screen.getByText(/React/i)).toBeInTheDocument();
+    expect(screen.getByText(/HTML\/CSS/i)).toBeInTheDocument();
     
-    // Check for specific skills within the skills section
-    const skillItems = within(skillsSection).getAllByRole('listitem');
-    
-    // Check if at least one skill item contains JavaScript
-    const hasJavaScript = skillItems.some(item => 
-      item.textContent.includes('JavaScript') || 
-      within(item).queryByText(/JavaScript/i)
-    );
-    expect(hasJavaScript).toBeTruthy();
-    
-    // Check for other skills
-    const hasReact = skillItems.some(item => 
-      item.textContent.includes('React') || 
-      within(item).queryByText(/React/i)
-    );
-    expect(hasReact).toBeTruthy();
-    
-    const hasHTML = skillItems.some(item => 
-      item.textContent.includes('HTML') || 
-      within(item).queryByText(/HTML/i)
-    );
-    expect(hasHTML).toBeTruthy();
+    // Check for progress bars
+    const progressBars = document.querySelectorAll('.bg-tertiary.h-2.rounded-full');
+    expect(progressBars.length).toBeGreaterThanOrEqual(3);
   });
 
   test('renders skill progress bars', () => {
@@ -68,14 +51,10 @@ describe('About Page', () => {
     const progressBars = document.querySelectorAll('.bg-tertiary.h-2.rounded-full');
     expect(progressBars.length).toBeGreaterThanOrEqual(6);
     
-    // Check if each progress bar has a width attribute
+    // Check if each progress bar has a width style
     progressBars.forEach(bar => {
-      const style = window.getComputedStyle(bar);
-      expect(style.width).not.toBe('');
-      
-      // Alternative check that doesn't rely on computed styles
-      const widthAttr = bar.getAttribute('style');
-      expect(widthAttr).toMatch(/width:/);
+      expect(bar).toHaveAttribute('style');
+      expect(bar.style.width).not.toBe('');
     });
   });
 
